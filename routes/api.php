@@ -1,0 +1,45 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\ProfileController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::group(['prefix' => 'v1'], function (){
+    /**
+     * @Route of Authentication
+     * @Controller AuthController
+     */
+    Route::controller(AuthController::class)->group(function (){
+        Route::post('/login', 'login');
+        Route::post('/register', 'register');
+        Route::post('/refresh', 'refresh');
+        Route::post('/me', 'me');
+    });
+
+    /**
+     * @Route of Update profile
+     * @Controller ProfileController
+     */
+    Route::controller(ProfileController::class)->group(function(){
+        Route::post('/profile/update', 'updateProfile');
+        Route::post('/profile/update/image', 'updateImage');
+        Route::post('/profile/update/password', 'updatePassword');
+    });
+});
+
