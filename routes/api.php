@@ -30,6 +30,8 @@ Route::group(['prefix' => 'v1'], function (){
         Route::post('/register', 'register');
         Route::post('/refresh', 'refresh');
         Route::post('/me', 'me');
+        Route::post('/verify/email', 'verifyEmail');
+        Route::post('/verify/code', 'verifyCode');
     });
 
     /**

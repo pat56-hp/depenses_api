@@ -5,8 +5,12 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\UserRepository;
-use App\Http\Requests\{LoginRequest, PasswordRequest, ProfileRequest, RegisterRequest};
+use App\Http\Requests\{ForgetRequest, LoginRequest, PasswordRequest, ProfileRequest, RegisterRequest};
+use App\Models\CodeVerification;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -14,7 +18,7 @@ class AuthController extends Controller
 
     public function __construct(UserRepository $userResponse){
         $this->userRepository = $userResponse;
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyEmail']]);
     }
 
     /**
@@ -30,7 +34,8 @@ class AuthController extends Controller
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        return $this->userRepository->responseWithToken($token);
+        $response = $this->userRepository->responseWithToken($token);
+        return response()->json($response);
     }
 
     /**
@@ -40,7 +45,7 @@ class AuthController extends Controller
     {
         try{
             $response = $this->userRepository->register($request);
-            return $response;
+            return response()->json($response);
         }catch(\Exception $e){
             logger()->error('Une erreur lors de l\'inscription  : ' . $e->getMessage());
             return response()->json(['error' => 'Une erreur s\'est produite.'], Response::HTTP_BAD_REQUEST);
@@ -53,6 +58,50 @@ class AuthController extends Controller
     public function me()
     {
         return response()->json(auth('api')->user());
+    }
+
+    //Verification de l'email et génération du code
+    public function verifyEmail(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Oups, une erreur dans le formulaire',
+                'data' => $validator->errors()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        try {
+            return response()->json($this->userRepository->verifyEmail($request->email));
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], Response::HTTP_NOT_ACCEPTABLE);
+        }
+    }
+
+    //Verification du envoyé par mail
+    public function verifyCode(ForgetRequest $request){
+        //On recupere le code de l'utilisateur et qui n'a pas dépassé 2 minutes apres la génération de celui-ci
+        $code = CodeVerification::whereHas('user', fn($q) => $q->whereEmail($request->email))
+            ->where(['code' => $request->code, 'status' => 1])
+            ->where('created_at', '<=', now()->subMinutes(2))
+            ->first();
+
+        if (!empty($code)) {
+            //On passe tous les codes de l'utilisateur en utilisés
+            CodeVerification::whereHas('user', fn($q) => $q->whereEmail($request->email))->update(['status' => 1]);
+
+            return response()->json([
+                'message' => "Le code est valide"
+            ]); 
+        }
+
+        return response()->json([
+            'message' => "Désolé, ce code est invalide."
+        ], Response::HTTP_NOT_ACCEPTABLE); 
     }
 
     /**

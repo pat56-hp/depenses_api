@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Http\Resources\UserResource;
+use App\Models\CodeVerification;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepository {
@@ -14,7 +17,7 @@ class UserRepository {
     }
 
     //Inscription
-    public function register($data){
+    public function register(Array $data){
         //Creation du user
         $this->user->create([
             'name' => $data['name'],
@@ -31,16 +34,34 @@ class UserRepository {
     }
 
     //Modification des informations du profil d'un utilisateur
-    public function updateProfile($data){
+    public function updateProfile(Array $data){
         auth('api')->user()->update([
             'name' => $data['name'],
             'adresse' => $data['adresse'],
         ]);
     }
 
+    //Verification de l'email de l'utilisateur
+    public function verifyEmail(String $email){
+        if ($user = User::whereEmail($email)->first()) {
+            //Creation du code de verification et envoie du code par mail à l'utilisateur
+            $code = CodeVerification::generate();
+            $user->code()->create([
+                'code' => $code,
+                'status' => 0,
+            ]);
+
+            return [
+                'message' => 'Utilisateur trouvé et code généré.'
+            ];
+        }
+
+        throw new Exception('Désolé, cette adresse email ne correspond à aucun utilisateur !');
+    }
+
 
     //Renvoie des infos de l'user connecté
-    public function responseWithToken($token){
+    public function responseWithToken(String $token){
         return [
             'access_token' => $token,
             'token_type' => 'bearer',
