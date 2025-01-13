@@ -32,6 +32,7 @@ Route::group(['prefix' => 'v1'], function (){
         Route::post('/me', 'me');
         Route::post('/verify/email', 'verifyEmail');
         Route::post('/verify/code', 'verifyCode');
+        Route::post('/resetPassword', 'ResetPassword');
     });
 
     /**

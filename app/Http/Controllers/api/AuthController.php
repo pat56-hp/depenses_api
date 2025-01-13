@@ -5,7 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\UserRepository;
-use App\Http\Requests\{ForgetRequest, LoginRequest, PasswordRequest, ProfileRequest, RegisterRequest};
+use App\Http\Requests\{ForgetRequest, LoginRequest, PasswordRequest, ProfileRequest, RegisterRequest, ResetPassword};
 use App\Models\CodeVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class AuthController extends Controller
 
     public function __construct(UserRepository $userResponse){
         $this->userRepository = $userResponse;
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyEmail']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyEmail', 'verifyCode', 'ResetPassword']]);
     }
 
     /**
@@ -42,9 +42,10 @@ class AuthController extends Controller
      * Inscription d'un utilisateur
      */
     public function register(RegisterRequest $request)
-    {
+    {  
+        $data = $request->only('name', 'email', 'password');
         try{
-            $response = $this->userRepository->register($request);
+            $response = $this->userRepository->register($data);
             return response()->json($response);
         }catch(\Exception $e){
             logger()->error('Une erreur lors de l\'inscription  : ' . $e->getMessage());
@@ -86,8 +87,8 @@ class AuthController extends Controller
     public function verifyCode(ForgetRequest $request){
         //On recupere le code de l'utilisateur et qui n'a pas dépassé 2 minutes apres la génération de celui-ci
         $code = CodeVerification::whereHas('user', fn($q) => $q->whereEmail($request->email))
-            ->where(['code' => $request->code, 'status' => 1])
-            ->where('created_at', '<=', now()->subMinutes(2))
+            ->where(['code' => $request->code, 'status' => 0])
+            ->where('created_at', '>=', now()->subMinutes(5))
             ->first();
 
         if (!empty($code)) {
@@ -102,6 +103,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => "Désolé, ce code est invalide."
         ], Response::HTTP_NOT_ACCEPTABLE); 
+    }
+
+    //Valider la reinitialisation du code
+    public function ResetPassword(ResetPassword $request){
+        $data = $request->only('email', 'password');
+        try{
+            return response()->json($this->userRepository->resetPassword($data));
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ], Response::HTTP_NOT_ACCEPTABLE);
+        }      
     }
 
     /**
@@ -119,8 +132,9 @@ class AuthController extends Controller
      * @return JsonResponse
      */
     public function updateProfile(ProfileRequest $request){
+        $data = $request->only('name', 'adresse');
         try {
-            $this->userRepository->updateProfile($request);
+            $this->userRepository->updateProfile($data);
             return response()->json([
                 'data' => auth('api')->user(),
                 'message' => 'Profile modifié avec succès'

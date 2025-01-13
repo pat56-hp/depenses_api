@@ -43,13 +43,18 @@ class UserRepository {
 
     //Verification de l'email de l'utilisateur
     public function verifyEmail(String $email){
-        if ($user = User::whereEmail($email)->first()) {
+        if ($user = $this->user->where('email', $email)->first()) {
             //Creation du code de verification et envoie du code par mail à l'utilisateur
             $code = CodeVerification::generate();
-            $user->code()->create([
+            $codeGenerate = $user->code()->create([
                 'code' => $code,
                 'status' => 0,
             ]);
+
+            //Met à jour les autres codes en utilisés
+            $user->code()
+                ->where('id', '!=', $codeGenerate->id)
+                ->update(['status' => 1]);
 
             return [
                 'message' => 'Utilisateur trouvé et code généré.'
@@ -57,6 +62,21 @@ class UserRepository {
         }
 
         throw new Exception('Désolé, cette adresse email ne correspond à aucun utilisateur !');
+    }
+
+    //Reinitialiser le mot de passe
+    public function resetPassword($data){
+        if($user = $this->user->whereEmail($data['email'])->first()){
+            $user->update([
+                'password' => Hash::make($data['password'])
+            ]);
+
+            return [
+                'message' => 'Votre mot de passe a été réinitialisé avec succès'
+            ];
+        }
+
+        throw new Exception('Impossible de trouver l\'utilisateur de cette adresse email');
     }
 
 

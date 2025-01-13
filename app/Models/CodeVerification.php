@@ -16,4 +16,8 @@ class CodeVerification extends Model
     public static function generate(){
         return rand(000000, 999999);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

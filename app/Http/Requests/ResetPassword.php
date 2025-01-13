@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Contracts\Validation\Validator;
 
-class ForgetRequest extends FormRequest
+class ResetPassword extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,15 +28,22 @@ class ForgetRequest extends FormRequest
     {
         return [
             'email' => 'required|email',
-            'code' => 'required',
+            'password' => ['required', Password::min(6)->letters()->symbols()->numbers(), 'confirmed'],
         ];
     }
 
+    // Envoie de la réponse en JSON
+    public function wantsJson()
+    {
+        return true;
+    }
+
+    // Désactivation de la redirection en cas d'erreur
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
             response()->json([
-                'message' => 'Oups, une erreur dans le formulaire',
+                'message' => 'Les données fournies sont invalides.',
                 'data' => $validator->errors()
             ], Response::HTTP_UNPROCESSABLE_ENTITY)
         );
