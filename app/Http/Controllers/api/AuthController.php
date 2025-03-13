@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Annotations as OA;
 
 class AuthController extends Controller
 {
@@ -22,7 +23,33 @@ class AuthController extends Controller
     }
 
     /**
-     * Connexion d'un utilisateur
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Authentification utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="secret")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Connexion réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5c...")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=406,
+     *         description="Email ou mot de passe incorrect",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Email ou mot de passe incorrect")
+     *         )
+     *     )
+     * )
      */
     public function login(LoginRequest $request)
     {
