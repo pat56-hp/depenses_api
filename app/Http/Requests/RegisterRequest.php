@@ -32,13 +32,17 @@ class RegisterRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                Rule::unique('users', 'email')->where(function ($query) {
+                $this->type === 'mobile'
+                ? Rule::unique('users')->where(fn ($query) => $query->where('sign_in_by', 'mobile'))
+                : null,
+                /* Rule::unique('users')->where(function ($query) {
                     // Unique si le type est mobile
                     logger()->info('mobile : ' . $this->type);
-                    if ($this->type !== 'mobile') {
-                        $query->where('sign_in_by', $this->type);
+                    if ($this->type == 'mobile') {
+                        return $query->where('sign_in_by', $this->type);
                     }
-                }),
+                    return $query;
+                }), */
             ],
             'type' => ['required', 'in:google,git,facebook,mobile'],
             'password' => ['required', Password::min(6)->letters()->symbols()->numbers()],
