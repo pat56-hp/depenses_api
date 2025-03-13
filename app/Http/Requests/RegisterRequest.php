@@ -7,6 +7,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -28,7 +29,18 @@ class RegisterRequest extends FormRequest
         //dd('ok');
         return [
             'name' => 'required|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->where(function ($query) {
+                    // Unique si le type est mobile
+                    logger()->info('mobile : ' . $this->type);
+                    if ($this->type !== 'mobile') {
+                        $query->where('sign_in_by', $this->type);
+                    }
+                }),
+            ],
+            'type' => ['required', 'in:google,git,facebook,mobile'],
             'password' => ['required', Password::min(6)->letters()->symbols()->numbers()],
         ];
     }

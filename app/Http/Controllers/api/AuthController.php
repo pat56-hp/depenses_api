@@ -43,13 +43,14 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {  
-        $data = $request->only('name', 'email', 'password');
+        logger()->info(json_encode($request->all()));
+        $data = $request->only('name', 'email', 'password', 'type');
         try{
             $response = $this->userRepository->register($data);
             return response()->json($response);
         }catch(\Exception $e){
             logger()->error('Une erreur lors de l\'inscription  : ' . $e->getMessage());
-            return response()->json(['error' => 'Une erreur s\'est produite.'], Response::HTTP_BAD_REQUEST);
+            return response()->json(['error' => 'Une erreur s\'est produite.'], Response::HTTP_NOT_ACCEPTABLE);
         }
     }
 

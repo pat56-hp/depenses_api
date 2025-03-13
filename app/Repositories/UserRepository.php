@@ -18,14 +18,29 @@ class UserRepository {
 
     //Inscription
     public function register(Array $data){
-        //Creation du user
-        $this->user->create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'statut' => 1, // Actif
-            'image' => '/images/user.png',
-        ]);
+        //On verifie si l'inscription se fait à partir des RS et que l'email existe deja
+        $signInBy = in_array($data['type'], ['google', 'facebook', 'github']);
+        $user = $this->user->where('email', $data['email'])->first();
+
+        if($user && $signInBy){
+            //On modifie les infos de l'utilisateur
+            $user->update([
+                'name' => $data['name'],
+                'password' => Hash::make($data['password']),
+                'statut' => 1, // Actif
+                'image' => '/images/user.png',
+            ]);
+        }else{
+            //Creation du user
+            $this->user->create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'statut' => 1, // Actif
+                'image' => '/images/user.png',
+                'sign_in_by' => $data['type']
+            ]);
+        }
 
         //Recuperation des credentials pour creation du token
         $credentials = ['email' => $data['email'], 'password' => $data['password']];
