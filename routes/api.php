@@ -33,15 +33,8 @@ Route::group(['prefix' => 'v1'], function (){
         Route::post('/verify/email', 'verifyEmail');
         Route::post('/verify/code', 'verifyCode');
         Route::post('/resetPassword', 'ResetPassword');
-    });
 
-    /**
-     * @Route of Update profile
-     * @Controller ProfileController
-     */
-    Route::controller(ProfileController::class)->group(function(){
         Route::post('/profile/update', 'updateProfile');
-        Route::post('/profile/update/image', 'updateImage');
         Route::post('/profile/update/password', 'updatePassword');
     });
 });

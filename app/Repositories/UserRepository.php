@@ -52,7 +52,6 @@ class UserRepository {
     public function updateProfile(Array $data){
         auth('api')->user()->update([
             'name' => $data['name'],
-            'adresse' => $data['adresse'],
         ]);
     }
 

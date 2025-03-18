@@ -160,7 +160,7 @@ class AuthController extends Controller
      * @return JsonResponse
      */
     public function updateProfile(ProfileRequest $request){
-        $data = $request->only('name', 'adresse');
+        $data = $request->only('name');
         try {
             $this->userRepository->updateProfile($data);
             return response()->json([
