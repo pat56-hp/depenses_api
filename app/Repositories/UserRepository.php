@@ -23,7 +23,7 @@ class UserRepository {
         $user = $this->user->where('email', $data['email'])->first();
 
         //Si l'utilisateur n'existe pas
-        if($user){
+        if(empty($user)){
             //Creation du user
             $this->user->create([
                 'name' => $data['name'],
