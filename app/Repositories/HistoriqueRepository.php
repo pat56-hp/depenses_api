@@ -32,7 +32,7 @@ class HistoriqueRepository {
         DB::beginTransaction();
         try {
             $historique = auth('api')->user()->historiques()->updateOrCreate(
-                ['user_id' => auth('api')->id(), 'id' => $data['id']], // Conditions de recherche
+                ['user_id' => auth('api')->id(), 'id' => $data['id'] ?? null], // Conditions de recherche
                 [
                     'libelle' => $data['libelle'],
                     'montant' => $data['montant'],
