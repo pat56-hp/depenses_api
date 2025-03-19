@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Models\CodeVerification;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserRepository {
@@ -36,12 +37,12 @@ class UserRepository {
 
             //Recuperation des credentials pour creation du token
             $credentials = ['email' => $data['email'], 'password' => $data['password']];
+            $token = auth('api')->attempt($credentials);
         }else{
-            //Recuperation des credentials pour creation du token
-            $credentials = ['email' => $data['email']];
+            //Si l'utilisateur existe déjà on le connecte directement
+            $token = Auth::guard('api')->login($user);
         }
         
-        $token = auth('api')->attempt($credentials);
         return $this->responseWithToken($token);
     }
 
