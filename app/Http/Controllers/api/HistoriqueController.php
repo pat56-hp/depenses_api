@@ -16,7 +16,7 @@ class HistoriqueController extends Controller
 {
     private $historiqueRepository;
 
-    protected function __construct(HistoriqueRepository $historiqueRepository) {
+    public function __construct(HistoriqueRepository $historiqueRepository) {
         $this->middleware('auth:api');
         $this->historiqueRepository = $historiqueRepository;
     }
