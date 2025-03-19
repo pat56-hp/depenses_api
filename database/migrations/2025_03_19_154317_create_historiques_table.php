@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('historiques', function (Blueprint $table) {
             $table->id();
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
             $table->string('libelle');
             $table->string('description')->nullable();
             $table->date('date');
