@@ -19,7 +19,7 @@ class HistoriqueResource extends JsonResource
             'libelle' => $this->libelle,
             'description' => $this->description,
             'montant' => $this->montant,
-            'date' => $this->date->format('d/m/Y'),
+            'date' => $this->date,
             'type' => $this->type,
         ];
     }
