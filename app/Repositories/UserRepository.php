@@ -33,10 +33,14 @@ class UserRepository {
                 'image' => '/images/user.png',
                 'sign_in_by' => $data['type']
             ]);
-        }
 
-        //Recuperation des credentials pour creation du token
-        $credentials = ['email' => $data['email'], 'password' => $data['password']];
+            //Recuperation des credentials pour creation du token
+            $credentials = ['email' => $data['email'], 'password' => $data['password']];
+        }else{
+            //Recuperation des credentials pour creation du token
+            $credentials = ['email' => $data['email']];
+        }
+        
         $token = auth('api')->attempt($credentials);
         return $this->responseWithToken($token);
     }
