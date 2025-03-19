@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\HistoriqueController;
 use App\Http\Controllers\api\ProfileController;
 
 /*
@@ -36,6 +37,16 @@ Route::group(['prefix' => 'v1'], function (){
 
         Route::post('/profile/update', 'updateProfile');
         Route::post('/profile/update/password', 'updatePassword');
+    });
+
+    /**
+     * @Route of Historique
+     * @Controller HistoriqueController
+     */
+    Route::controller(HistoriqueController::class)->group(['prefix' => 'historiques'], function (){
+        Route::get('/', 'index');
+        Route::post('/store', 'storeOrUpdate');
+        Route::delete('/delete/{id}', 'delete');
     });
 });
 

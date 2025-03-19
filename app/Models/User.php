@@ -72,4 +72,8 @@ class User extends Authenticatable implements JWTSubject
     public function code(){
         return $this->hasMany(CodeVerification::class, 'user_id');
     }
+
+    public function historiques(){
+        return $this->hasMany(Historique::class, 'user_id');
+    }
 }
