@@ -44,9 +44,9 @@ Route::group(['prefix' => 'v1'], function (){
      * @Controller HistoriqueController
      */
     Route::controller(HistoriqueController::class)->group(function (){
-        Route::get('/historique', 'index');
-        Route::post('/historique', 'storeOrUpdate');
-        Route::delete('/historique/{id}', 'delete');
+        Route::get('/historiques', 'index');
+        Route::post('/historiques', 'storeOrUpdate');
+        Route::delete('/historiques/delete/{id}', 'destroy');
     });
 });
 
