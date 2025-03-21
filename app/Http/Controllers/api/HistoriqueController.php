@@ -53,9 +53,6 @@ class HistoriqueController extends Controller
         try {            
             return response()->json([
                 'data' => new HistoriqueResource($this->historiqueRepository->storeOrUpdate($data)),
-                'solde' => $this->getHistorique($data['date'])['solde'],
-                'revenus' => $this->getHistorique($data['date'])['revenus'],
-                'depenses' => $this->getHistorique($data['date'])['depenses'],
                 'message' => 'Historique sauvegardé avec succès'
             ], HttpJsonResponse::HTTP_CREATED);
         } catch (\Throwable $th) {
