@@ -92,10 +92,14 @@ class HistoriqueController extends Controller
 
     //Statistiques
     private function getHistorique($date){
+        $revenues = auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 0)->sum('montant');
+        $depenses = auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 1)->sum('montant');
+        $solde = $revenues - $depenses;  // Calcul du solde sur la date donnée
+
         return [
-            'solde' => auth('api')->user()->historiques()->whereDate('date', $date)->sum('montant'),
-            'revenus' => auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 0)->sum('montant'),
-            'depenses' => auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 1)->sum('montant')
+            'solde' => $solde,
+            'revenus' => $revenues,
+            'depenses' => $solde
         ]; 
     }
 }
