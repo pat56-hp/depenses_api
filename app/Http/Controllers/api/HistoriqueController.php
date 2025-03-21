@@ -99,7 +99,7 @@ class HistoriqueController extends Controller
         return [
             'solde' => $solde,
             'revenus' => $revenues,
-            'depenses' => $solde
+            'depenses' => $depenses
         ]; 
     }
 }
