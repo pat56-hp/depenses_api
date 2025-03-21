@@ -72,9 +72,13 @@ class HistoriqueController extends Controller
         DB::beginTransaction();
 
         try {
+            $historique = $this->historiqueRepository->find($id);
             $this->historiqueRepository->delete($id);
             DB::commit();
             return response()->json([
+                'solde' => $this->getHistorique($historique->date)['solde'],
+                'revenus' => $this->getHistorique($historique->date)['revenus'],
+                'depenses' => $this->getHistorique($historique->date)['depenses'],
                 'message' => "Donnée supprimée avec succès"
             ], JsonResponse::HTTP_OK);
         } catch (\Throwable $th) {
