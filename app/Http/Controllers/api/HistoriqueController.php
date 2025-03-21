@@ -32,16 +32,11 @@ class HistoriqueController extends Controller
             $this->historiqueRepository->getAll($date)
         );
 
-        //Statistiques
-        $solde = auth('api')->user()->historiques()->whereDate('date', $date)->sum('montant');
-        $revenus = auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 0)->sum('montant');
-        $depenses = auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 1)->sum('montant');
-
         return response()->json([
             'data' => $historique,
-            'solde' => $solde,
-            'revenus' => $revenus,
-            'depenses' => $depenses,
+            'solde' => $this->getHistorique($date)['solde'],
+            'revenus' => $this->getHistorique($date)['revenus'],
+            'depenses' => $this->getHistorique($date)['depenses'],
             'message' => 'Historique récupérés avec succès'
         ], JsonResponse::HTTP_OK);
     }
@@ -55,9 +50,12 @@ class HistoriqueController extends Controller
             'libelle', 'description', 'montant', 'date', 'type', 'id'
         );
 
-        try {
+        try {            
             return response()->json([
                 'data' => new HistoriqueResource($this->historiqueRepository->storeOrUpdate($data)),
+                'solde' => $this->getHistorique($data['date'])['solde'],
+                'revenus' => $this->getHistorique($data['date'])['revenus'],
+                'depenses' => $this->getHistorique($data['date'])['depenses'],
                 'message' => 'Historique sauvegardé avec succès'
             ], HttpJsonResponse::HTTP_CREATED);
         } catch (\Throwable $th) {
@@ -68,29 +66,6 @@ class HistoriqueController extends Controller
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    /**
-     * Modification d'une info de l'historique
-     */
-    /* public function update(HistoriqueRequest $request, string $id)
-    {
-        $data = $request->only(
-            'libelle', 'description', 'montant', 'date', 'type'
-        );
-
-        try {
-            return response()->json([
-                'data' => new HistoriqueResource($this->historiqueRepository->storeOrUpdate($data, $id)),
-                'message' => 'Historique modifié avec succès'
-            ], HttpJsonResponse::HTTP_CREATED);
-        } catch (\Throwable $th) {
-            logger()->error('Erreur lors la modification de l\'historique : ' . $th->getMessage());
-            return response()->json([
-               'message' => 'Erreur lors de la modification de l\'historique',
-                'error' => $th->getMessage()
-            ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    } */
 
     /**
      * Suppression d'une donnee
@@ -113,5 +88,14 @@ class HistoriqueController extends Controller
                 'error' => $th->getMessage()
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    //Statistiques
+    private function getHistorique($date){
+        return [
+            'solde' => auth('api')->user()->historiques()->whereDate('date', $date)->sum('montant'),
+            'revenus' => auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 0)->sum('montant'),
+            'depenses' => auth('api')->user()->historiques()->whereDate('date', $date)->where('type', 1)->sum('montant')
+        ]; 
     }
 }
