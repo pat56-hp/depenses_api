@@ -7,6 +7,7 @@ use App\Http\Requests\HistoriqueRequest;
 use App\Http\Resources\HistoriqueResource;
 use App\Models\Historique;
 use App\Repositories\HistoriqueRepository;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse as HttpJsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class HistoriqueController extends Controller
      */
     public function index(Request $request)
     {
-        $date = $request->date ?? now();
+        $date = Carbon::parse($request->date) ?? now();
 
         $historique = HistoriqueResource::collection(
             $this->historiqueRepository->getAll($date)
@@ -99,8 +100,8 @@ class HistoriqueController extends Controller
 
         return [
             'solde' => $solde,
-            'revenus' => $revenues,
-            'depenses' => $depenses
+            'revenus' => (int) $revenues,
+            'depenses' => (int) $depenses
         ]; 
     }
 }
